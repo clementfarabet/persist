@@ -14,7 +14,11 @@ function connect(opt)
    clear = opt.clear or false
 
    -- Connect:
-   local client = redis.connect(url,port)
+   local ok,client = pcall(function() return redis.connect(url,port) end)
+   if not ok then
+      print('persist> error connecting to redis @ ' .. url .. ':' .. port)
+      print('persist> make sure you have a running redis server (redis-server)')
+   end
 
    -- New persisting table:
    local persist = {}
