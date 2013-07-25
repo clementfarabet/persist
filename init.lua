@@ -18,6 +18,7 @@ function connect(opt)
    if not ok then
       print('persist> error connecting to redis @ ' .. url .. ':' .. port)
       print('persist> make sure you have a running redis server (redis-server)')
+      error()
    end
 
    -- New persisting table:
