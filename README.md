@@ -37,6 +37,7 @@ p = require('persist')({
    url = 'localhost',
    port = 6379,
    verbose = false, -- this is not only used on startup
-   namespace = 'th'  -- this is the namespace in Redis
+   namespace = 'th',  -- this is the namespace in Redis
+   clear = false, -- clear all the data
 })
 ```
