@@ -17,10 +17,11 @@ function connect(opt)
    local client = redis.connect(url,port)
 
    -- New persisting table:
-   local persist = {__cached={}}
-   local __cached = persist.__cached
+   local persist = {}
+   local __cached = {}
    setmetatable(persist, {
       __newindex = function(self,k,v)
+         if k=="_" then print('persist> _ is a reserved keyword') return end
          __cached[k] = v
          if v then
             v = json.encode(v)
@@ -30,6 +31,7 @@ function connect(opt)
          end
       end,
       __index = function(self,k)
+         if k=="_" then return __cached end
          local v = client:get(namespace..k)
          v = json.decode(v)
          return v
