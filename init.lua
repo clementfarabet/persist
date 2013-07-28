@@ -9,7 +9,10 @@ function connect(opt)
    opt = opt or {}
    url = opt.url or 'localhost'
    port = opt.port or 6379
-   namespace = (opt.namespace or 'th') .. '.'
+   namespace = opt.namespace
+   if namespace then
+      namespace = namespace .. ':'
+   end
    verbose = opt.verbose or false
    clear = opt.clear or false
 
