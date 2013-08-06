@@ -41,7 +41,7 @@ function connect(opt)
       __index = function(self,k)
          if k=="_" then return __cached end
          local v = client:get(namespace..k)
-         v = json.decode(v)
+         v = v and json.decode(v)
          return v
       end,
    })
