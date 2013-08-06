@@ -54,7 +54,7 @@ function connect(opt)
    end
 
    -- Clear?
-   for k in pairs(persist) do
+   for k in pairs(persist._) do
       persist[k] = nil
    end
 
