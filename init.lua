@@ -54,8 +54,10 @@ function connect(opt)
    end
 
    -- Clear?
-   for k in pairs(persist._) do
-      persist[k] = nil
+   if clear then
+      for k in pairs(persist._) do
+         persist[k] = nil
+      end
    end
 
    -- Verbose:
