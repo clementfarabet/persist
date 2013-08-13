@@ -7,14 +7,15 @@ local redis = require 'redis'
 function connect(opt)
    -- Namespace:
    opt = opt or {}
-   url = opt.url or 'localhost'
-   port = opt.port or 6379
-   namespace = opt.namespace
+   local url = opt.url or 'localhost'
+   local port = opt.port or 6379
+   local namespace = opt.namespace
    if namespace then
       namespace = namespace .. ':'
    end
-   verbose = opt.verbose or false
-   clear = opt.clear or false
+   local verbose = opt.verbose or false
+   local clear = opt.clear or false
+   local cache = opt.cache or false
 
    -- Connect:
    local ok,client = pcall(function() return redis.connect(url,port) end)
@@ -30,7 +31,10 @@ function connect(opt)
    setmetatable(persist, {
       __newindex = function(self,k,v)
          if k=="_" then print('persist> _ is a reserved keyword') return end
-         __cached[k] = v
+         if cache then __cached[k] = v end
+         if not client:ping() then
+            client = redis.connect(url,port)
+         end
          if v then
             v = json.encode(v)
             client:set(namespace..k,v)
@@ -40,6 +44,9 @@ function connect(opt)
       end,
       __index = function(self,k)
          if k=="_" then return __cached end
+         if not client:ping() then
+            client = redis.connect(url,port)
+         end
          local v = client:get(namespace..k)
          v = v and json.decode(v)
          return v
@@ -47,10 +54,12 @@ function connect(opt)
    })
 
    -- Restore:
-   local keys = client:keys(namespace..'*')
-   for _,key in ipairs(keys) do
-      local k = key:gsub('^'..namespace,'')
-      __cached[k] = persist[k]
+   if cache then
+      local keys = client:keys(namespace..'*')
+      for _,key in ipairs(keys) do
+         local k = key:gsub('^'..namespace,'')
+         __cached[k] = persist[k]
+      end
    end
 
    -- Clear?
@@ -66,8 +75,10 @@ function connect(opt)
          print('persist> new session started @ ' .. url .. ':' .. port)
       else
          print('persist> restored session @ ' .. url .. ':' .. port)
-         print('persist> restored content:')
-         print(__cached)
+         if cache then
+            print('persist> restored content:')
+            print(__cached)
+         end
       end
    end
 
