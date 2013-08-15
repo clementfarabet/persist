@@ -12,6 +12,8 @@ function connect(opt)
    local namespace = opt.namespace
    if namespace then
       namespace = namespace .. ':'
+   else
+      namespace = ''
    end
    local verbose = opt.verbose or false
    local clear = opt.clear or false
@@ -38,8 +40,14 @@ function connect(opt)
          if v then
             v = json.encode(v)
             client:set(namespace..k,v)
+            if verbose then
+               print('persist> stored ' .. k)
+            end
          else
             client:del(namespace..k)
+            if verbose then
+               print('persist> cleared ' .. k)
+            end
          end
       end,
       __index = function(self,k)
@@ -49,8 +57,16 @@ function connect(opt)
          end
          local v = client:get(namespace..k)
          v = v and json.decode(v)
+         if verbose then
+            print('persist> restored ' .. k)
+         end
          return v
       end,
+      __tostring = function(self)
+         local keys = client:keys(namespace..'*')
+         local n = #keys
+         return '<persisting table @ redis://'..namespace..'*, #keys='..n..'>'
+      end
    })
 
    -- Restore:
@@ -64,21 +80,27 @@ function connect(opt)
 
    -- Clear?
    if clear then
-      for k in pairs(persist._) do
-         persist[k] = nil
+      local keys = client:keys(namespace..'*')
+      local n = #keys
+      for _,key in ipairs(keys) do
+         local k = key:gsub('^'..namespace,'')
+         client:del(namespace..k)
+      end
+      if verbose then
+         print('persist> cleared ' .. n .. ' entries')
       end
    end
 
    -- Verbose:
    if verbose then
-      if not next(__cached) then
+      -- N Keys:
+      local keys = client:keys(namespace..'*')
+      local n = #keys
+      if n == 0 then
          print('persist> new session started @ ' .. url .. ':' .. port)
       else
          print('persist> restored session @ ' .. url .. ':' .. port)
-         if cache then
-            print('persist> restored content:')
-            print(__cached)
-         end
+         print('persist> restored ' .. n .. ' keys')
       end
    end
 
