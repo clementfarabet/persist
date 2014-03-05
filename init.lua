@@ -66,6 +66,10 @@ function connect(opt)
          local keys = client:keys(namespace..'*')
          local n = #keys
          return '<persisting table @ redis://'..namespace..'*, #keys='..n..'>'
+      end,
+      keys = function(self)
+         local keys = client:keys(namespace..'*')
+         return keys
       end
    })
 
