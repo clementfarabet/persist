@@ -52,7 +52,6 @@ function connect(opt)
       end,
       __index = function(self,k)
          if k=="_" then return __cached end
-         if k=="_keys" then return getmetatable(self).keys(self) end
          if not client:ping() then
             client = redis.connect(url,port)
          end
