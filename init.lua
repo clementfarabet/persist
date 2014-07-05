@@ -34,9 +34,7 @@ local function connect(opt)
       __newindex = function(self,k,v)
          if k=="_" then print('persist> _ is a reserved keyword') return end
          if cache then __cached[k] = v end
-         if not client:ping() then
-            client = redis.connect(url,port)
-         end
+         client = redis.connect(url,port)
          if v then
             v = json.encode(v)
             client:set(namespace..k,v)
@@ -52,9 +50,7 @@ local function connect(opt)
       end,
       __index = function(self,k)
          if k=="_" then return __cached end
-         if not client:ping() then
-            client = redis.connect(url,port)
-         end
+         client = redis.connect(url,port)
          local v = client:get(namespace..k)
          v = v and json.decode(v)
          if verbose then
