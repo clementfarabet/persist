@@ -4,7 +4,7 @@ local json = require 'cjson'
 local redis = require 'redis'
 
 -- Connect
-function connect(opt)
+local function connect(opt)
    -- Namespace:
    opt = opt or {}
    local url = opt.url or 'localhost'
